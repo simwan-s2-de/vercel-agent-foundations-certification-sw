@@ -1,0 +1,24 @@
+{
+  "eventType": "run_created",
+  "specVersion": 8,
+  "eventData": {
+    "deploymentId": "dpl_local@5.2.0",
+    "workflowName": "workflow//./lib/workflows/return-flow//returnFlow",
+    "input": {
+      "__type": "Uint8Array",
+      "data": "ZGV2bFtbMSwyXSwiMDEiLCJXcm9uZyBzaXplIHJlY2VpdmVkIl0="
+    },
+    "executionContext": {
+      "traceCarrier": {},
+      "workflowCoreVersion": "5.3.0",
+      "nodeVersion": "24.22.1",
+      "features": {
+        "encryption": false
+      },
+      "hookResumeInputVersion": 1
+    }
+  },
+  "runId": "wrun_01M6KA6GJ8G2QZ172QT00QQ2GY",
+  "eventId": "evnt_00000000000000000000000001",
+  "createdAt": "2026-11-04T12:57:59.637Z"
+}
