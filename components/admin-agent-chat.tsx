@@ -12,6 +12,7 @@
  */
 import { useChat } from "@ai-sdk/react";
 import { WorkflowChatTransport } from "@ai-sdk/workflow/client";
+import { SquareTerminal } from "lucide-react";
 import { useState } from "react";
 import {
   Conversation,
@@ -64,14 +65,73 @@ export function AdminAgentChat() {
         <ConversationContent>
           {messages.map((message) =>
             message.parts.map((part, index) => {
-              if (part.type !== "text") return null;
-              return (
-                <Message key={`${message.id}-${index}`} from={message.role}>
-                  <MessageContent>
-                    <MessageResponse>{part.text}</MessageResponse>
-                  </MessageContent>
-                </Message>
-              );
+              switch (part.type) {
+                case "text":
+                  return (
+                    <Message key={`${message.id}-${index}`} from={message.role}>
+                      <MessageContent>
+                        <MessageResponse>{part.text}</MessageResponse>
+                      </MessageContent>
+                    </Message>
+                  );
+                case "tool-bash": {
+                  const commandInput = part.input as
+                    | { command?: string }
+                    | undefined;
+                  const output = part.output as
+                    | { stdout?: string; stderr?: string }
+                    | undefined;
+                  const isRunning =
+                    part.state === "input-streaming" ||
+                    part.state === "input-available";
+                  const terminalLabel =
+                    part.state === "output-error" ? "Failed" : "Terminal";
+                  return (
+                    <div
+                      key={`${message.id}-${index}`}
+                      className="my-2 min-w-0 max-w-full overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 font-mono text-sm"
+                    >
+                      <div className="flex items-center gap-2 border-b border-neutral-800 bg-neutral-800/50 px-3 py-2 text-neutral-400">
+                        <SquareTerminal className="size-4 shrink-0" aria-hidden="true" />
+                        <span className="text-xs">
+                          {isRunning ? "Running..." : terminalLabel}
+                        </span>
+                      </div>
+                      <div className="px-3 py-2">
+                        <pre className="whitespace-pre-wrap font-semibold text-neutral-100 [overflow-wrap:anywhere]">
+                          $ {commandInput?.command}
+                        </pre>
+                        {part.state === "output-available" && output && (
+                          <div className="mt-1 text-neutral-300">
+                            {output.stdout && (
+                              <pre className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+                                {output.stdout}
+                              </pre>
+                            )}
+                            {output.stderr && (
+                              <pre className="whitespace-pre-wrap text-red-400 [overflow-wrap:anywhere]">
+                                {output.stderr}
+                              </pre>
+                            )}
+                          </div>
+                        )}
+                        {part.state === "output-error" && (
+                          <pre role="alert" className="mt-1 whitespace-pre-wrap text-red-400 [overflow-wrap:anywhere]">
+                            {part.errorText}
+                          </pre>
+                        )}
+                        {isRunning && (
+                          <div className="mt-1 flex items-center gap-1 text-neutral-500">
+                            <span className="h-4 w-2 animate-pulse bg-current" aria-hidden="true" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+                default:
+                  return null;
+              }
             }),
           )}
           {error ? <div role="alert">{error.message}</div> : null}
